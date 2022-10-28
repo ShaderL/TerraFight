@@ -1,0 +1,5 @@
+*.rar
+*.sln
+*.user
+x64\
+.vs\
