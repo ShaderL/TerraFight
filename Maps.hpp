@@ -48,7 +48,7 @@ public:
 	~MapBase();
 	int Update();
 	int Draw();                                  //请在Maps.cpp里实现Draw函数（画block时直接调用block.draw()就行（你刚刚实现的））
-	int GetNonGroundBlockNum();
+	int GetBlockNum();
 	Block GetBlock(int num);
 };
 
@@ -76,7 +76,7 @@ int Block::Draw()                        //实现后请直接翻到最下面看MapBase的构造
 		IMAGE block;
 		int num = m_width / basewid;
 
-		loadimage(&block, L"block3.png", basewid, m_height);
+		loadimage(&block, L".\\resources\\block3.png", basewid, m_height);
 		for (int i = 1; i <= num; i++)
 		{
 			putimage(m_basepos.x + basewid * (i - 1), m_basepos.y , &block);
@@ -182,31 +182,31 @@ int MapBase::Draw()
 	//在这里写地图的绘制函数
 	IMAGE p1, p2, p3, p4, p5, p6, p7, p8, p9;
 
-	loadimage(&p1, L"p1.jpg", 448, 252);
+	loadimage(&p1, L".\\resources\\p1.jpg", 448, 252);
 	putimage(0, 0, &p1);
 
-	loadimage(&p2, L"p2.jpg", 448, 252);
+	loadimage(&p2, L".\\resources\\p2.jpg", 448, 252);
 	putimage(448, 0, &p2);
 
-	loadimage(&p3, L"p3.jpg", 448, 252);
+	loadimage(&p3, L".\\resources\\p3.jpg", 448, 252);
 	putimage(896, 0, &p3);
 
-	loadimage(&p4, L"p4.jpg", 448, 252);
+	loadimage(&p4, L".\\resources\\p4.jpg", 448, 252);
 	putimage(0, 252, &p4);
 
-	loadimage(&p5, L"p5.jpg", 448, 252);
+	loadimage(&p5, L".\\resources\\p5.jpg", 448, 252);
 	putimage(448, 252, &p5);
 
-	loadimage(&p6, L"p6.jpg", 448, 252);
+	loadimage(&p6, L".\\resources\\p6.jpg", 448, 252);
 	putimage(896, 252, &p6);
 
-	loadimage(&p7, L"p7.jpg", 448, 252);
+	loadimage(&p7, L".\\resources\\p7.jpg", 448, 252);
 	putimage(0, 504, &p7);
 
-	loadimage(&p8, L"p8.jpg", 448, 252);
+	loadimage(&p8, L".\\resources\\p8.jpg", 448, 252);
 	putimage(448, 504, &p8);
 
-	loadimage(&p9, L"p9.jpg", 448, 252);
+	loadimage(&p9, L".\\resources\\p9.jpg", 448, 252);
 	putimage(896, 504, &p9);
 
 	for (vector<Block>::iterator it = m_blocklist.begin(); it != m_blocklist.end(); it++)
@@ -215,7 +215,7 @@ int MapBase::Draw()
 	}
 	return DONE;
 }
-int MapBase::GetNonGroundBlockNum()
+int MapBase::GetBlockNum()
 {
 	return m_blocknum;
 }

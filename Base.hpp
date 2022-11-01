@@ -56,6 +56,10 @@ const int ud = 0;
 const int lr = 1;   //线段水平与垂直
 
 const int COMPENSATE_PARAM = 15; //碰撞补偿参数
+
+const int HIT = 1;
+const int MISS = 0; //子弹碰撞返回值
+
 //全局通用结构体
 
 typedef struct Position  //坐标结构
@@ -285,7 +289,7 @@ HitBox::HitBox(pos basepos, int length, int width)
 	m_Basepos.y = basepos.y;
 
 	m_UpLeft.x = basepos.x;
-	m_UpLeft.y = basepos.y + length;
+	m_UpLeft.y = basepos.y - length;
 
 	m_DownRight.x = basepos.x + width;
 	m_DownRight.y = basepos.y;
@@ -294,7 +298,7 @@ HitBox::HitBox(pos basepos, int length, int width)
 	m_DownLeft.y = basepos.y;
 
 	m_UpRight.x = basepos.x + width;
-	m_UpRight.y = basepos.y + length;
+	m_UpRight.y = basepos.y - length;
 }
 HitBox::HitBox()
 {
@@ -419,6 +423,7 @@ int HitBox::Updatepos(pos basepos)
 }
 bool HitBox::CheckPBHit(pos targetpos)
 {
+
 	if (targetpos.x > m_UpLeft.x && targetpos.x < m_UpRight.x)
 	{
 		if (targetpos.y > m_UpLeft.y && targetpos.y < m_DownLeft.y)

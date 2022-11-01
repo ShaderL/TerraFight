@@ -48,12 +48,18 @@ void GameProgress(pc playerchoices)
 
 	pos p1basepos, p2basepos;
 	pos p1shootpos, p2shootpos;
+	pos testhbpos;
+
+	//testhbpos.x = 600;
+	//testhbpos.y = 600;
+
+	//HitBox hbtest(testhbpos,100,100);
 
 	p1basepos.x = 200;
-	p1basepos.y = 455;
+	p1basepos.y = 655;
 	
 	p2basepos.x = 1100;
-	p2basepos.y = 455;
+	p2basepos.y = 655;
 	
 	HitBox p1hbox(p1basepos,plength,pwidth), p2hbox(p2basepos, plength, pwidth);
 
@@ -67,6 +73,7 @@ void GameProgress(pc playerchoices)
 	Mage mage1(p1basepos, p1hbox, p1shootpos), mage2(p2basepos, p2hbox, p2shootpos);
 	Worrior worrior1(p1basepos, p1hbox, p1shootpos), worrior2(p2basepos, p2hbox, p2shootpos);
 
+	
 	if (playerchoices.player1 == shooter && playerchoices.player2 == shooter)//1射2射
 	{
 		Shooter p1(p1basepos, p1hbox, p1shootpos), p2(p2basepos, p2hbox, p2shootpos);
@@ -337,10 +344,8 @@ void GameProgress(pc playerchoices)
 				pos basepos;
 				basepos.x = 0;
 				basepos.y = 0;
-				Bullet b(basepos,FACE_LEFT);
-				MagicBall a(basepos, FACE_LEFT);
-				b = p1.Update(deltaT, map1);
-				a = p2.Update(deltaT, map1);
+				Bullet b = p1.Update(deltaT, map1);
+				MagicBall a = p2.Update(deltaT, map1);
 				if (b.m_life != dead)
 					p1Bulletlist.push_back(b);
 				if (a.m_life != dead)
@@ -348,28 +353,17 @@ void GameProgress(pc playerchoices)
 				map1.Update();
 				for (vector<Bullet>::iterator it = p1Bulletlist.begin(); it != p1Bulletlist.end(); it++)//各玩家伤害类更新
 				{
-					it->Update(p2.GetHitBox(),deltaT);
-				}
-				for (vector<MagicBall>::iterator it = p1MagicBalllist.begin(); it != p1MagicBalllist.end(); it++)
-				{
-					it->Update(p2.GetHitBox(), deltaT);
-				}
-				for (vector<Sword>::iterator it = p1Swordlist.begin(); it != p1Swordlist.end(); it++)
-				{
-					it->Update(p2.GetHitBox(), deltaT);
-				}
-
-				for (vector<Bullet>::iterator it = p2Bulletlist.begin(); it != p2Bulletlist.end(); it++)
-				{
-					it->Update(p1.GetHitBox(), deltaT);
+					if (it->Update(p2.GetHitBox(), deltaT))
+					{
+						p2.CalDamage(it->m_damage);
+					}
 				}
 				for (vector<MagicBall>::iterator it = p2MagicBalllist.begin(); it != p2MagicBalllist.end(); it++)
 				{
-					it->Update(p1.GetHitBox(), deltaT);
-				}
-				for (vector<Sword>::iterator it = p2Swordlist.begin(); it != p2Swordlist.end(); it++)
-				{
-					it->Update(p1.GetHitBox(), deltaT);
+					if (it->Update(p1.GetHitBox(), deltaT))
+					{
+						p1.CalDamage(it->m_damage);
+					}
 				}
 
 				for (vector<CureHeart>::iterator it = chlist.begin(); it != chlist.end(); it++)// 物品更新
@@ -388,6 +382,27 @@ void GameProgress(pc playerchoices)
 					it->Update(p2.GetHitBox());
 				}
 
+				for (vector<Bullet>::iterator it = p1Bulletlist.begin(); it != p1Bulletlist.end();)
+				{
+
+					if (it->m_life == dead)
+					{
+		
+						p1Bulletlist.erase(it);
+					}
+
+					else
+						it++;
+				}
+				for (vector<MagicBall>::iterator it = p2MagicBalllist.begin(); it != p2MagicBalllist.end(); it)
+				{
+					if (it->m_life == dead)
+						p2MagicBalllist.erase(it);
+					else
+						it++;
+				}
+
+
 				//对象绘制
 				map1.Draw();
 				p1.Paint();
@@ -397,24 +412,7 @@ void GameProgress(pc playerchoices)
 				{
 					it->Paint();
 				}
-				for (vector<MagicBall>::iterator it = p1MagicBalllist.begin(); it != p1MagicBalllist.end(); it++)
-				{
-					it->Paint();
-				}
-				for (vector<Sword>::iterator it = p1Swordlist.begin(); it != p1Swordlist.end(); it++)
-				{
-					it->Paint();
-				}
-
-				for (vector<Bullet>::iterator it = p2Bulletlist.begin(); it != p2Bulletlist.end(); it++)//各玩家伤害类绘制
-				{
-					it->Paint();
-				}
 				for (vector<MagicBall>::iterator it = p2MagicBalllist.begin(); it != p2MagicBalllist.end(); it++)
-				{
-					it->Paint();
-				}
-				for (vector<Sword>::iterator it = p2Swordlist.begin(); it != p2Swordlist.end(); it++)
 				{
 					it->Paint();
 				}
@@ -431,6 +429,7 @@ void GameProgress(pc playerchoices)
 				{
 					it->Paint();
 				}
+
 
 				//按键系统
 							//玩家1
@@ -546,10 +545,8 @@ void GameProgress(pc playerchoices)
 				pos basepos;
 				basepos.x = 0;
 				basepos.y = 0;
-				Bullet b(basepos, FACE_LEFT);
-				MagicBall a(basepos, FACE_LEFT);
-				b = p1.Update(deltaT, map1);
-				a = p2.Update(deltaT, map1);
+				Bullet b = p1.Update(deltaT, map1);
+				MagicBall a = p2.Update(deltaT, map1);
 				if (b.m_life != dead)
 					p1Bulletlist.push_back(b);
 				if (a.m_life != dead)
@@ -557,28 +554,17 @@ void GameProgress(pc playerchoices)
 				map1.Update();
 				for (vector<Bullet>::iterator it = p1Bulletlist.begin(); it != p1Bulletlist.end(); it++)//各玩家伤害类更新
 				{
-					it->Update(p2.GetHitBox(), deltaT);
-				}
-				for (vector<MagicBall>::iterator it = p1MagicBalllist.begin(); it != p1MagicBalllist.end(); it++)
-				{
-					it->Update(p2.GetHitBox(), deltaT);
-				}
-				for (vector<Sword>::iterator it = p1Swordlist.begin(); it != p1Swordlist.end(); it++)
-				{
-					it->Update(p2.GetHitBox(), deltaT);
-				}
-
-				for (vector<Bullet>::iterator it = p2Bulletlist.begin(); it != p2Bulletlist.end(); it++)
-				{
-					it->Update(p1.GetHitBox(), deltaT);
+					if (it->Update(p2.GetHitBox(), deltaT))
+					{
+						p2.CalDamage(it->m_damage);
+					}
 				}
 				for (vector<MagicBall>::iterator it = p2MagicBalllist.begin(); it != p2MagicBalllist.end(); it++)
 				{
-					it->Update(p1.GetHitBox(), deltaT);
-				}
-				for (vector<Sword>::iterator it = p2Swordlist.begin(); it != p2Swordlist.end(); it++)
-				{
-					it->Update(p1.GetHitBox(), deltaT);
+					if (it->Update(p1.GetHitBox(), deltaT))
+					{
+						p1.CalDamage(it->m_damage);
+					}
 				}
 
 				for (vector<CureHeart>::iterator it = chlist.begin(); it != chlist.end(); it++)// 物品更新
@@ -597,6 +583,29 @@ void GameProgress(pc playerchoices)
 					it->Update(p2.GetHitBox());
 				}
 
+				for (vector<Bullet>::iterator it = p1Bulletlist.begin(); it != p1Bulletlist.end();)
+				{
+
+					if (it->m_life == dead)
+					{
+						p1Bulletlist.erase(it);
+
+			
+
+					}
+
+					else
+						it++;
+				}
+				for (vector<MagicBall>::iterator it = p2MagicBalllist.begin(); it != p2MagicBalllist.end(); )
+				{
+					if (it->m_life == dead)
+						p2MagicBalllist.erase(it);
+					else
+						it++;
+				}
+
+	
 				//对象绘制
 				map1.Draw();
 				p1.Paint();
@@ -606,24 +615,7 @@ void GameProgress(pc playerchoices)
 				{
 					it->Paint();
 				}
-				for (vector<MagicBall>::iterator it = p1MagicBalllist.begin(); it != p1MagicBalllist.end(); it++)
-				{
-					it->Paint();
-				}
-				for (vector<Sword>::iterator it = p1Swordlist.begin(); it != p1Swordlist.end(); it++)
-				{
-					it->Paint();
-				}
-
-				for (vector<Bullet>::iterator it = p2Bulletlist.begin(); it != p2Bulletlist.end(); it++)//各玩家伤害类绘制
-				{
-					it->Paint();
-				}
 				for (vector<MagicBall>::iterator it = p2MagicBalllist.begin(); it != p2MagicBalllist.end(); it++)
-				{
-					it->Paint();
-				}
-				for (vector<Sword>::iterator it = p2Swordlist.begin(); it != p2Swordlist.end(); it++)
 				{
 					it->Paint();
 				}
@@ -640,6 +632,7 @@ void GameProgress(pc playerchoices)
 				{
 					it->Paint();
 				}
+
 
 				//按键系统
 				//玩家1

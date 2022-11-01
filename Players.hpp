@@ -29,7 +29,7 @@ protected:
 	int m_pblock;
 
 public:
-	PlayerBase():m_pblock(0), m_G(1100), m_jumplock(0) {};
+	PlayerBase():m_Ismovingl(0),m_Ismovingr(0), m_pblock(0), m_G(1100), m_jumplock(0) {};
 	PlayerBase( pos basepos, HitBox hbox, pos shootpos, double xspeed = 10.000, double jumpspeed = 10, int attackspeed = 10,int health = 100, int shield = 0,int faceori = FACE_LEFT);
 	~PlayerBase();
 	virtual int Paint();                            //int 返回函数执行情况
@@ -46,8 +46,9 @@ public:
 	HitBox GetHitBox();
 	int GetLife();
 	int GetJumpLock();
-	void Updatepos(pos basepos);
+	virtual void Updatepos(pos basepos);
 	void PullBack(Line l1, int linedir);
+	void Getmr();
 };
 
 class Shooter :public PlayerBase
@@ -166,7 +167,7 @@ int PlayerBase::CalItemBuff(int type, int value)
 }
 int PlayerBase::CheckDirAccess(MapBase map)
 {
-	int bnum = map.GetNonGroundBlockNum();
+	int bnum = map.GetBlockNum();
 	int flag = 1;
 	pos ULpos, URpos, DRpos, DLpos;
 	//地图边框检测，无须检测下边框，因为地图必定有底层block即ground
@@ -426,6 +427,10 @@ void PlayerBase::PullBack(Line l1, int linedir)
 		//x轴坐标不变
 	}
 }
+void PlayerBase::Getmr()
+{
+	cout << m_Ismovingr << endl;
+}
 
 
 
@@ -441,6 +446,9 @@ Shooter::Shooter(pos basepos, HitBox hbox, pos shootpos, double xspeed, double j
 	m_jumplock = 0;
 	m_Ismovingl = 0;
 	m_Ismovingr = 0;
+	cout <<  ' ' << endl;
+	cout << ' ' << endl;
+
 
 	m_Xspeed = xspeed;
 	m_attackspeed = attackspeed;
@@ -482,16 +490,16 @@ int Shooter::Paint()
 		if (m_faceori == FACE_LEFT)
 		{
 			IMAGE img1, img2;
-			loadimage(&img1, L"shooter_l1.png", 50, 100);
-			loadimage(&img2, L"shooter_l2.png", 50, 100);
+			loadimage(&img1, L".\\resources\\shooter_l1.png", 50, 100);
+			loadimage(&img2, L".\\resources\\shooter_l2.png", 50, 100);
 			putimage(x, y  , &img1, SRCAND);
 			putimage(x, y  , &img2, SRCPAINT);
 		}
 		else if (m_faceori == FACE_RIGHT)
 		{
 			IMAGE img1, img2;
-			loadimage(&img1, L"shooter_r1.png", 50, 100);
-			loadimage(&img2, L"shooter_r2.png", 50, 100);
+			loadimage(&img1, L".\\resources\\shooter_r1.png", 50, 100);
+			loadimage(&img2, L".\\resources\\shooter_r2.png", 50, 100);
 			putimage(x, y , &img1, SRCAND);
 			putimage(x, y , &img2, SRCPAINT);
 		}
@@ -519,85 +527,89 @@ void Shooter::Updatepos(pos basepos)
 }
 Bullet Shooter::Update(clock_t deltaT, MapBase map)
 {
-	CheckDirAccess(map);
-	cout << "diracc: " << m_dir.up << ' ' << m_dir.down << ' ' << m_dir.left << ' ' << m_dir.right;
-	cout << " pos: u: " << m_hbox.GetPoint(upleft).y<< " d: " << m_hbox.GetPoint(downleft).y << " l: " << m_hbox.GetPoint(upleft).x << " r: " << m_hbox.GetPoint(upright).x << endl;
-	m_hbox.Updatepos(m_basepos);
-	Updatepos(m_basepos);
-	if (m_Health <= 0)
-		Die();
-	//落地检测，jumplock置零
-	if (GetJumpLock() == 1 && m_Yspeed > 0 && m_dir.down == unaccess)
-		m_jumplock = 0;
-	//第一步：移动/坐标更新
-		//上下移动/坐标更新
-	if (m_dir.up == accessable)
+	if (m_life == alive)
 	{
-		if (m_dir.down == accessable)
+		CheckDirAccess(map);
+		//cout << "diracc: " << m_dir.up << ' ' << m_dir.down << ' ' << m_dir.left << ' ' << m_dir.right;
+		//cout << " pos: u: " << m_hbox.GetPoint(upleft).y<< " d: " << m_hbox.GetPoint(downleft).y << " l: " << m_hbox.GetPoint(upleft).x << " r: " << m_hbox.GetPoint(upright).x << endl;
+		m_hbox.Updatepos(m_basepos);
+		Updatepos(m_basepos);
+		if (m_Health <= 0)
+			Die();
+		//落地检测，jumplock置零
+		if (GetJumpLock() == 1 && m_Yspeed > 0 && m_dir.down == unaccess)
+			m_jumplock = 0;
+		//第一步：移动/坐标更新
+			//上下移动/坐标更新
+		if (m_dir.up == accessable)
 		{
-			m_Yspeed += (m_G * deltaT) / (double)1000;
-			m_basepos.y += m_Yspeed * deltaT / (double)1000;
+			if (m_dir.down == accessable)
+			{
+				m_Yspeed += (m_G * deltaT) / (double)1000;
+				m_basepos.y += m_Yspeed * deltaT / (double)1000;
+			}
+			else if (m_dir.down == unaccess)
+			{
+				if (m_Yspeed >= 0)
+				{
+					m_Yspeed = 0;
+				}
+				else if (m_Yspeed <= 0)
+				{
+					m_Yspeed += (m_G * deltaT) / (double)1000;
+					m_basepos.y += m_Yspeed * deltaT / (double)1000;
+				}
+			}
 		}
-		else if (m_dir.down == unaccess)
+		else if (m_dir.down == accessable && m_dir.up == unaccess)
 		{
-			if (m_Yspeed >= 0)
+			if (m_Yspeed < 0)
 			{
 				m_Yspeed = 0;
 			}
-			else if (m_Yspeed <= 0)
+			else if (m_Yspeed >= 0)
 			{
 				m_Yspeed += (m_G * deltaT) / (double)1000;
 				m_basepos.y += m_Yspeed * deltaT / (double)1000;
 			}
 		}
-	}
-	else if (m_dir.down == accessable && m_dir.up == unaccess)
-	{
-		if (m_Yspeed < 0)
-		{
-			m_Yspeed = 0;
-		}
-		else if (m_Yspeed >= 0)
-		{
-			m_Yspeed += (m_G * deltaT) / (double)1000;
-			m_basepos.y += m_Yspeed * deltaT / (double)1000;
-		}
-	}
 
-	//左右移动/坐标更新
-	if (m_dir.left == accessable && m_Ismovingl == 1)
-	{
-		m_basepos.x -= (m_Xspeed * (double)deltaT) / 50;
-	}
-	if (m_dir.right == accessable && m_Ismovingr == 1)
-	{
-		m_basepos.x += (m_Xspeed * (double)deltaT) / 50;
-	}
-	//攻击更新
-	if (m_attackstate == BEGIN_FIRE)
-	{
-		m_attacktime += deltaT/1000;
-		int attacktime = m_attacktime;
-		if (attacktime % m_attackspeed == 0)
+		//左右移动/坐标更新
+		if (m_dir.left == accessable && m_Ismovingl == 1)
 		{
-			Bullet b(m_shootpos, m_faceori);
-			return b;
+			m_basepos.x -= (m_Xspeed * (double)deltaT) / 50;
 		}
+		if (m_dir.right == accessable && m_Ismovingr == 1)
+		{
+			m_basepos.x += (m_Xspeed * (double)deltaT) / 50;
+		}
+		//攻击更新
+		if (m_attackstate == BEGIN_FIRE)
+		{
+			m_attacktime += deltaT / 1000;
+			int attacktime = m_attacktime;
+			if (attacktime % m_attackspeed == 0)
+			{
+				Bullet* b = new Bullet(m_shootpos, m_faceori);
+				return *b;
+			}
 
+		}
 	}
-	Bullet a(m_shootpos,m_faceori,dead);//无效子弹
-	return a;
+		Bullet* a = new Bullet(m_shootpos, m_faceori, dead);//无效子弹
+		return *a;
+	
 }
 int Shooter::PaintHealthBar()
 {
 	IMAGE backimg1, backimg2, iconimg1, iconimg2, bar;
 
-	loadimage(&backimg1, L"healthbarback1.png", 510, 100);
-	loadimage(&iconimg1, L"Shootericon1.png", 80, 80);
-	loadimage(&bar, L"healthbar.png", 4, 35);
+	loadimage(&backimg1, L".\\resources\\healthbarback1.png", 510, 100);
+	loadimage(&iconimg1, L".\\resources\\Shootericon1.png", 80, 80);
+	loadimage(&bar, L".\\resources\\healthbar.png", 4, 35);
 
-	loadimage(&backimg2, L"healthbarback2.png", 510, 100);
-	loadimage(&iconimg2, L"Shootericon2.png", 80, 80);
+	loadimage(&backimg2, L".\\resources\\healthbarback2.png", 510, 100);
+	loadimage(&iconimg2, L".\\resources\\Shootericon2.png", 80, 80);
 
 
 	putimage(20, 20, &backimg2, SRCAND);
@@ -606,7 +618,7 @@ int Shooter::PaintHealthBar()
 	putimage(30, 30, &iconimg2, SRCAND);
 	putimage(30, 30, &iconimg1, SRCPAINT);
 
-	for (int i = 0; i  <= m_Health ; i++)
+	for (int i = 0; i  < m_Health ; i++)
 	{
 		putimage(117 + i*4 , 38, &bar);
 	}
@@ -628,6 +640,8 @@ Mage::Mage(pos basepos, HitBox hbox, pos shootpos, double xspeed, double jumpspe
 	m_jumplock = 0;
 	m_Ismovingl = 0;
 	m_Ismovingr = 0;
+	cout << ' ' << endl;
+	cout << ' ' << endl;
 
 	m_Xspeed = xspeed;
 	m_attackspeed = attackspeed;
@@ -668,16 +682,16 @@ int Mage::Paint()
 		if (m_faceori == FACE_LEFT)
 		{
 			IMAGE img1, img2;
-			loadimage(&img1, L"wizard_l1.png", 50, 100);
-			loadimage(&img2, L"wizard_l2.png", 50, 100);
+			loadimage(&img1, L".\\resources\\wizard_l1.png", 50, 100);
+			loadimage(&img2, L".\\resources\\wizard_l2.png", 50, 100);
 			putimage(x, y , &img1, SRCAND);
 			putimage(x, y , &img2, SRCPAINT);
 		}
 		else if (m_faceori == FACE_RIGHT)
 		{
 			IMAGE img1, img2;
-			loadimage(&img1, L"wizard_r1.png", 50, 100);
-			loadimage(&img2, L"wizard_r2.png", 50, 100);
+			loadimage(&img1, L".\\resources\\wizard_r1.png", 50, 100);
+			loadimage(&img2, L".\\resources\\wizard_r2.png", 50, 100);
 			putimage(x, y , &img1, SRCAND);
 			putimage(x, y, &img2, SRCPAINT);
 		}
@@ -700,74 +714,77 @@ int Mage::EndAttack()
 }
 MagicBall Mage::Update(clock_t deltaT, MapBase map)
 {
-	CheckDirAccess(map);
-	m_hbox.Updatepos(m_basepos);
-	Updatepos(m_basepos);
-	if (m_Health <= 0)
-		Die();
-	//落地检测，jumplock置零
-	if (GetJumpLock() == 1 && m_Yspeed > 0 && m_dir.down == unaccess)
-		m_jumplock = 0;
-	//第一步：移动/坐标更新
-		//上下移动/坐标更新
-	if (m_dir.up == accessable)
+	if (m_life == alive)
 	{
-		if (m_dir.down == accessable)
+		CheckDirAccess(map);
+		m_hbox.Updatepos(m_basepos);
+		Updatepos(m_basepos);
+		if (m_Health <= 0)
+			Die();
+		//落地检测，jumplock置零
+		if (GetJumpLock() == 1 && m_Yspeed > 0 && m_dir.down == unaccess)
+			m_jumplock = 0;
+		//第一步：移动/坐标更新
+			//上下移动/坐标更新
+		if (m_dir.up == accessable)
 		{
-			m_Yspeed += (m_G * deltaT) / (double)1000;
-			m_basepos.y += m_Yspeed * deltaT / (double)1000;
+			if (m_dir.down == accessable)
+			{
+				m_Yspeed += (m_G * deltaT) / (double)1000;
+				m_basepos.y += m_Yspeed * deltaT / (double)1000;
+			}
+			else if (m_dir.down == unaccess)
+			{
+				if (m_Yspeed >= 0)
+				{
+					m_Yspeed = 0;
+				}
+				else if (m_Yspeed <= 0)
+				{
+					m_Yspeed += (m_G * deltaT) / (double)1000;
+					m_basepos.y += m_Yspeed * deltaT / (double)1000;
+				}
+			}
 		}
-		else if (m_dir.down == unaccess)
+		else if (m_dir.down == accessable && m_dir.up == unaccess)
 		{
-			if (m_Yspeed >= 0)
+			if (m_Yspeed < 0)
 			{
 				m_Yspeed = 0;
 			}
-			else if (m_Yspeed <= 0)
+			else if (m_Yspeed >= 0)
 			{
 				m_Yspeed += (m_G * deltaT) / (double)1000;
 				m_basepos.y += m_Yspeed * deltaT / (double)1000;
 			}
 		}
-	}
-	else if (m_dir.down == accessable && m_dir.up == unaccess)
-	{
-		if (m_Yspeed < 0)
-		{
-			m_Yspeed = 0;
-		}
-		else if (m_Yspeed >= 0)
-		{
-			m_Yspeed += (m_G * deltaT) / (double)1000;
-			m_basepos.y += m_Yspeed * deltaT / (double)1000;
-		}
-	}
 
-	//左右移动/坐标更新
-	if (m_dir.left == accessable && m_Ismovingl == 1)
-	{
-		m_basepos.x -= (m_Xspeed * (double)deltaT) / 50;
-	}
-	if (m_dir.right == accessable && m_Ismovingr == 1)
-	{
-		m_basepos.x += (m_Xspeed * (double)deltaT) / 50;
-	}
-
-	//攻击更新
-	if (m_attackstate == BEGIN_FIRE)
-	{
-		m_attacktime += deltaT / 1000;
-		int attacktime = m_attacktime;
-		if (attacktime % m_attackspeed == 0)
+		//左右移动/坐标更新
+		if (m_dir.left == accessable && m_Ismovingl == 1)
 		{
-			MagicBall b(m_shootpos, m_faceori);
-			return b;
+			m_basepos.x -= (m_Xspeed * (double)deltaT) / 50;
+		}
+		if (m_dir.right == accessable && m_Ismovingr == 1)
+		{
+			m_basepos.x += (m_Xspeed * (double)deltaT) / 50;
 		}
 
-	}
+		//攻击更新
+		if (m_attackstate == BEGIN_FIRE)
+		{
+			m_attacktime += deltaT / 1000;
+			int attacktime = m_attacktime;
+			if (attacktime % m_attackspeed == 0)
+			{
+				MagicBall* b = new MagicBall(m_shootpos, m_faceori);
+				return *b;
+			}
 
-	MagicBall a(m_shootpos, m_faceori, dead);//无效法球
-	return a;
+		}
+	}
+		MagicBall* a = new MagicBall(m_shootpos, m_faceori, dead);//无效法球
+		return *a;
+	
 
 }
 int Mage::PaintHealthBar()
@@ -833,16 +850,16 @@ int Worrior::Paint()
 		if (m_faceori == FACE_LEFT)
 		{
 			IMAGE img1, img2;
-			loadimage(&img1, L"soldier_l1.png", 50, 100);
-			loadimage(&img2, L"soldier_l2.png", 50, 100);
+			loadimage(&img1, L".\\resources\\soldier_l1.png", 50, 100);
+			loadimage(&img2, L".\\resources\\soldier_l2.png", 50, 100);
 			putimage(x, y - 100, &img1, SRCAND);
 			putimage(x, y - 100, &img2, SRCPAINT);
 		}
 		else if (m_faceori == FACE_RIGHT)
 		{
 			IMAGE img1, img2;
-			loadimage(&img1, L"soldier_r1.png", 50, 100);
-			loadimage(&img2, L"soldier_r2.png", 50, 100);
+			loadimage(&img1, L".\\resources\\soldier_r1.png", 50, 100);
+			loadimage(&img2, L".\\resources\\soldier_r2.png", 50, 100);
 			putimage(x, y - 100, &img1, SRCAND);
 			putimage(x, y - 100, &img2, SRCPAINT);
 		}
@@ -928,14 +945,14 @@ Sword Worrior::Update(clock_t deltaT, MapBase map)
 		int attacktime = m_attacktime;
 		if (attacktime % m_attackspeed == 0)
 		{
-			Sword b(m_shootpos, m_faceori);
-			return b;
+			Sword *b = new Sword(m_shootpos, m_faceori);
+			return *b;
 		}
 
 	}
 
-	Sword a(m_shootpos, m_faceori, dead);//无效剑气
-	return a;
+	Sword *a = new Sword(m_shootpos, m_faceori, dead);//无效剑气
+	return *a;
 
 }
 void Worrior::Updatepos(pos basepos)

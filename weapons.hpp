@@ -35,7 +35,7 @@ public:
 	double m_speed;
 	int m_life = alive;
 	int m_face;
-	MagicBall(pos basepos, int face, int life = alive,int length = 60, int width = 60 , int damage = 20 , double speed = 1);
+	MagicBall(pos basepos, int face, int life = alive,int length = 60, int width = 60 , int damage = 10 , double speed = 1);
 	MagicBall(const MagicBall& a);
 	~MagicBall();
 	int Update(HitBox plhbox, clock_t deltaT);
@@ -85,25 +85,44 @@ Bullet::Bullet(const Bullet& a)
 Bullet::~Bullet() {};
 int Bullet::Update(HitBox plhbox, clock_t deltaT)
 {
-	if (m_hbox.CheckBoxHit(plhbox) == true)
-		m_life = dead;
+	m_hbox.Updatepos(m_basepos);
+	cout << plhbox.GetPoint(upleft).x << ' ' << plhbox.GetPoint(upright).x << ' ' << plhbox.GetPoint(upleft).y << ' ' << plhbox.GetPoint(downleft).y << endl;
 	if (m_life == alive)
 	{
-		if (m_face == FACE_RIGHT)
-			m_basepos.x += m_speed * deltaT;
-		else if (m_face == FACE_LEFT)
-			m_basepos.x -= m_speed * deltaT;
+
+		if (plhbox.CheckPBHit(m_hbox.GetPoint(downleft)) == true)
+		{
+			m_life = dead;
+			cout << "HIT!" << endl;
+			return HIT;
+		}
+		if (m_hbox.GetPoint(upleft).x >= 1344 || m_hbox.GetPoint(upright).x <= 0)
+		{
+			m_life = dead;
+		}
+		if (m_life == alive)
+		{
+			if (m_face == FACE_RIGHT)
+				m_basepos.x += m_speed * deltaT;
+			else if (m_face == FACE_LEFT)
+				m_basepos.x -= m_speed * deltaT;
+		}
+		return MISS;
 	}
-	return DONE;
+	else 
+	    return MISS;
 }
 int Bullet::Paint()
 {
-	IMAGE img1, img2;        //子弹图片     图片大小用碰撞箱里的长宽
-	loadimage(&img1, L"Bullet1.png", m_width, m_length);
-	loadimage(&img2, L"Bullet2.png", m_width, m_length);
-	putimage(m_basepos.x, m_basepos.y, &img2, SRCAND);
-	putimage(m_basepos.x, m_basepos.y, &img1, SRCPAINT);
-	return DONE;
+	if (m_life == alive)
+	{
+		IMAGE img1, img2;        //子弹图片     图片大小用碰撞箱里的长宽
+		loadimage(&img1, L".\\resources\\Bullet1.png", m_width, m_length);
+		loadimage(&img2, L".\\resources\\Bullet2.png", m_width, m_length);
+		putimage(m_basepos.x, m_basepos.y, &img2, SRCAND);
+		putimage(m_basepos.x, m_basepos.y, &img1, SRCPAINT);
+		return DONE;
+	}
 }
 
 
@@ -165,25 +184,42 @@ MagicBall::MagicBall(const MagicBall& a)
 MagicBall::~MagicBall() {};
 int MagicBall::Update(HitBox plhbox, clock_t deltaT)
 {
-	if (m_hbox.CheckBoxHit(plhbox) == true)
-		m_life = dead;
+	m_hbox.Updatepos(m_basepos);
 	if (m_life == alive)
 	{
-		if (m_face == FACE_RIGHT)
-			m_basepos.x += m_speed * deltaT;
-		else if (m_face == FACE_LEFT)
-			m_basepos.x -= m_speed * deltaT;
+		if (m_hbox.CheckBoxHit(plhbox) == true)
+		{
+			m_life = dead;
+			cout << "HIT!!!!" << endl;
+			return HIT;
+		}
+		if (m_hbox.GetPoint(upleft).x >= 1344 || m_hbox.GetPoint(upright).x <= 0)
+		{
+			m_life = dead;
+		}
+		if (m_life == alive)
+		{
+			if (m_face == FACE_RIGHT)
+				m_basepos.x += m_speed * deltaT;
+			else if (m_face == FACE_LEFT)
+				m_basepos.x -= m_speed * deltaT;
+		}
+		return MISS;
 	}
-	return DONE;
+	else
+		return MISS;
 }
 int MagicBall::Paint()
 {
-	IMAGE img1, img2;        //法球图片     图片大小用碰撞箱里的长宽
-	loadimage(&img1, L"MagicBall1.png", m_width, m_length);
-	loadimage(&img2, L"MagicBall2.png", m_width, m_length);
-	putimage(m_basepos.x, m_basepos.y, &img2, SRCAND);
-	putimage(m_basepos.x, m_basepos.y, &img1, SRCPAINT);
-	return DONE;
+	if (m_life == alive)
+	{
+		IMAGE img1, img2;        //法球图片     图片大小用碰撞箱里的长宽
+		loadimage(&img1, L".\\resources\\MagicBall1.png", m_width, m_length);
+		loadimage(&img2, L".\\resources\\MagicBall2.png", m_width, m_length);
+		putimage(m_basepos.x, m_basepos.y, &img2, SRCAND);
+		putimage(m_basepos.x, m_basepos.y, &img1, SRCPAINT);
+		return DONE;
+	}
 }
 
 
@@ -256,8 +292,8 @@ int Sword::Paint()
 	if (m_life == alive)
 	{
 		IMAGE img1, img2;        //剑气图片     图片大小用碰撞箱里的长宽
-		loadimage(&img1, L"Sword1.png", m_width, m_length);
-		loadimage(&img2, L"Sword2.png", m_width, m_length);
+		loadimage(&img1, L".\\resources\\Sword1.png", m_width, m_length);
+		loadimage(&img2, L".\\resources\\Sword2.png", m_width, m_length);
 		putimage(m_basepos.x, m_basepos.y, &img2, SRCAND);
 		putimage(m_basepos.x, m_basepos.y, &img1, SRCPAINT);
 	}
