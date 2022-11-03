@@ -81,7 +81,7 @@ int Block::Draw()                        //实现后请直接翻到最下面看MapBase的构造
 		{
 			putimage(m_basepos.x + basewid * (i - 1), m_basepos.y , &block);
 		}
-		m_hbox.DrawHbox();
+
 	}
 	return DONE;
 }

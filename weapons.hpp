@@ -17,7 +17,7 @@ public:
 	double m_speed;         //µØµ¿ÀŸ∂»
 	int m_life = alive;
 	int m_face;
-	Bullet(pos basepos, int face, int life = alive,int length = 20,int width = 20,int damage = 5,double speed = 1);
+	Bullet(pos basepos, int face, int life = alive,int length = 20,int width = 20,int damage = 3,double speed = 1);
 	Bullet(const Bullet& a);
 	~Bullet();
 	int Update(HitBox plhbox, clock_t deltaT);
@@ -35,7 +35,7 @@ public:
 	double m_speed;
 	int m_life = alive;
 	int m_face;
-	MagicBall(pos basepos, int face, int life = alive,int length = 60, int width = 60 , int damage = 10 , double speed = 1);
+	MagicBall(pos basepos, int face, int life = alive,int length = 60, int width = 60 , int damage = 5 , double speed = 1);
 	MagicBall(const MagicBall& a);
 	~MagicBall();
 	int Update(HitBox plhbox, clock_t deltaT);

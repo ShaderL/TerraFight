@@ -60,6 +60,8 @@ const int COMPENSATE_PARAM = 15; //碰撞补偿参数
 const int HIT = 1;
 const int MISS = 0; //子弹碰撞返回值
 
+const int player1 = 1;
+const int player2 = 2;   //玩家一玩家二
 //全局通用结构体
 
 typedef struct Position  //坐标结构
