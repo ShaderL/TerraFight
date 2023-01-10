@@ -69,11 +69,11 @@ typedef struct Position  //坐标结构
 	double x;
 	double y;
 }pos;
-typedef struct Line //线段结构，仅限水平或垂直线段
+struct Line //线段结构，仅限水平或垂直线段
 {
 	pos pos1;
 	pos pos2;
-}Line;
+};
 
 
 typedef struct DirectionAccess
@@ -528,3 +528,4 @@ bool BBHit(HitBox hbox1, HitBox hbox2)
 	else
 		return false;
 }
+

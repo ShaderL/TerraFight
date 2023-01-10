@@ -8,7 +8,7 @@ class PlayerBase
 {
 protected:
 	int m_life;
-	int m_player;
+	int m_player;//用来判断血条位置
 	int m_Health;
 	int m_Shield;
 	pos m_basepos;
@@ -58,7 +58,7 @@ protected:
 	static string m_ID;
 
 public:
-	Shooter(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 10, double jumpspeed = 1000.0, int attackspeed = 1500, int health = 100, int shield = 0, int faceori = FACE_LEFT);
+	Shooter(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 10, double jumpspeed = 1000.0, int attackspeed = 9, int health = 100, int shield = 0, int faceori = FACE_LEFT);
 	~Shooter();
 	int Paint();
 	int BeginAttack();
@@ -74,7 +74,7 @@ protected:
 	static string m_ID;
 
 public:
-	Mage(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 10, double jumpspeed = 1000.0, int attackspeed = 500, int health = 100, int shield = 0, int faceori = FACE_LEFT);
+	Mage(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 10, double jumpspeed = 1000.0, int attackspeed = 30,int health = 100, int shield = 0, int faceori = FACE_LEFT);
 	~Mage();
 	int Paint();
 	int BeginAttack();
@@ -90,14 +90,17 @@ protected:
 	static string m_ID;
 
 public:
-	Worrior(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 10, double jumpspeed = 1000.0, int attackspeed = 10, int health = 100, int shield = 0, int faceori = FACE_LEFT);
+	Worrior();
+	Worrior(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 15, double jumpspeed = 1000.0, int attackspeed = 36, int health = 100, int shield = 0, int faceori = FACE_LEFT);
 	~Worrior();
 	int Paint();
 	int BeginAttack();
 	int EndAttack();
 	int PaintHealthBar();
 	void Updatepos(pos basepos);
+	int GetFace();
 	Sword Update(clock_t deltaT, MapBase map);
+	pos GetShootpos();
 };
 
 PlayerBase::PlayerBase(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed, double jumpspeed, int attackspeed, int health, int shield, int faceori) :m_G(50), m_jumplock(0)
@@ -530,10 +533,10 @@ void Shooter::Updatepos(pos basepos)
 }
 Bullet Shooter::Update(clock_t deltaT, MapBase map)
 {
+
 	if (m_life == alive)
 	{
 		CheckDirAccess(map);
-		//cout << "diracc: " << m_dir.up << ' ' << m_dir.down << ' ' << m_dir.left << ' ' << m_dir.right;
 		//cout << " pos: u: " << m_hbox.GetPoint(upleft).y<< " d: " << m_hbox.GetPoint(downleft).y << " l: " << m_hbox.GetPoint(upleft).x << " r: " << m_hbox.GetPoint(upright).x << endl;
 		m_hbox.Updatepos(m_basepos);
 		Updatepos(m_basepos);
@@ -589,7 +592,8 @@ Bullet Shooter::Update(clock_t deltaT, MapBase map)
 		//攻击更新
 		if (m_attackstate == BEGIN_FIRE)
 		{
-			m_attacktime += deltaT / 1000;
+
+			m_attacktime += 3;//suppose every loop add 3
 			int attacktime = m_attacktime;
 			if (attacktime % m_attackspeed == 0)
 			{
@@ -645,8 +649,8 @@ int Shooter::PaintHealthBar()
 	}
 	else if (m_player == player2)
 	{
-		loadimage(&backimg1, L".\\resources\\hbback_shooter_r1.png", 560, 100);
-		loadimage(&backimg2, L".\\resources\\hbback_shooter_r2.png", 560, 100);
+		loadimage(&backimg1, L".\\resources\\hbback_shooter_r1.png", 570, 100);
+		loadimage(&backimg2, L".\\resources\\hbback_shooter_r2.png", 570, 100);
 
 		putimage(765, 20, &backimg2, SRCAND);
 		putimage(765, 20, &backimg1, SRCPAINT);
@@ -656,7 +660,7 @@ int Shooter::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Ghealthbar.png", 4, 51);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(1172 - (double)i * 4, 37.5, &bar);
+				putimage(1168 - (double)i * 4, 37.5, &bar);
 			}
 		}
 		else if (m_Health < 60 && m_Health >= 30)
@@ -664,15 +668,15 @@ int Shooter::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Yhealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(1172 - (double)i * 4, 37.5, &bar);
+				putimage(1168 - (double)i * 4, 37.5, &bar);
 			}
 		}
 		else if (m_Health < 30)
 		{
-			loadimage(&bar, L".\\resources\\Rhealthbar.png", 3, 52);
+			loadimage(&bar, L".\\resources\\Rhealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(1172 - (double)i * 4, 37.5, &bar);
+				putimage(1168 - (double)i * 4, 37.5, &bar);
 			}
 		}
 	}
@@ -829,7 +833,7 @@ MagicBall Mage::Update(clock_t deltaT, MapBase map)
 		//攻击更新
 		if (m_attackstate == BEGIN_FIRE)
 		{
-			m_attacktime += deltaT / 1000;
+			m_attacktime += 3;//suppose every loop add 3
 			int attacktime = m_attacktime;
 			if (attacktime % m_attackspeed == 0)
 			{
@@ -850,10 +854,8 @@ int Mage::PaintHealthBar()
 
 	if (m_player == player1)
 	{
-		loadimage(&backimg1, L".\\resources\\hbback_mage_l1.png", 575, 100);
-
-
-		loadimage(&backimg2, L".\\resources\\hbback_mage_l2.png", 575, 100);
+		loadimage(&backimg1, L".\\resources\\hbback_mage_l1.png", 560, 100);
+		loadimage(&backimg2, L".\\resources\\hbback_mage_l2.png", 560, 100);
 
 		putimage(20, 20, &backimg2, SRCAND);
 		putimage(20, 20, &backimg1, SRCPAINT);
@@ -863,7 +865,7 @@ int Mage::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Ghealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(188 + (double)i * 4, 37.5, &bar);
+				putimage(171 + (double)i * 4, 37.5, &bar);
 			}
 		}
 		else if (m_Health < 60 && m_Health >= 30)
@@ -871,7 +873,7 @@ int Mage::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Yhealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(188 + (double)i * 4, 37.5, &bar);
+				putimage(171 + (double)i * 4, 37.5, &bar);
 			}
 		}
 		else if (m_Health < 30)
@@ -879,7 +881,7 @@ int Mage::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Rhealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(188 + (double)i * 4, 37.5, &bar);
+				putimage(171 + (double)i * 4, 37.5, &bar);
 			}
 		}
 	}
@@ -939,7 +941,6 @@ Worrior::Worrior(pos basepos, HitBox hbox, pos shootpos, int player, double xspe
 	m_Ismovingl = 0;
 	m_Ismovingr = 0;
 
-	m_Xspeed = xspeed;
 	m_attackspeed = attackspeed;
 
 	m_Health = health;
@@ -991,6 +992,7 @@ int Worrior::Paint()
 			putimage(x, y - 100, &img1, SRCAND);
 			putimage(x, y - 100, &img2, SRCPAINT);
 		}
+		PaintHealthBar();
 		return DONE;
 	}
 	PaintHealthBar();
@@ -1011,12 +1013,9 @@ int Worrior::EndAttack()
 int Worrior::PaintHealthBar()
 {
 	IMAGE backimg1, backimg2, bar;
-
 	if (m_player == player1)
 	{
 		loadimage(&backimg1, L".\\resources\\hbback_worrior_l1.png", 575, 100);
-
-
 		loadimage(&backimg2, L".\\resources\\hbback_worrior_l2.png", 575, 100);
 
 		putimage(20, 20, &backimg2, SRCAND);
@@ -1052,51 +1051,36 @@ int Worrior::PaintHealthBar()
 		loadimage(&backimg1, L".\\resources\\hbback_worrior_r1.png", 575, 100);
 		loadimage(&backimg2, L".\\resources\\hbback_worrior_r2.png", 575, 100);
 
-		putimage(20, 20, &backimg2, SRCAND);
-		putimage(20, 20, &backimg1, SRCPAINT);
+		putimage(765, 20, &backimg2, SRCAND);
+		putimage(765, 20, &backimg1, SRCPAINT);
 
 		if (m_Health >= 60)
 		{
-			loadimage(&bar, L".\\resources\\Ghealthbar.png", 600, 52);
+			loadimage(&bar, L".\\resources\\Ghealthbar.png", 4, 51);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(660 + (double)i * 3.4, 37.5, &bar);
+				putimage(1172 - (double)i * 4, 37.5, &bar);
 			}
 		}
 		else if (m_Health < 60 && m_Health >= 30)
 		{
-			loadimage(&backimg1, L".\\resources\\hbback_worrior_r1.png", 560, 100);
-			loadimage(&backimg2, L".\\resources\\hbback_worrior_r2.png", 560, 100);
-
-			putimage(765, 20, &backimg2, SRCAND);
-			putimage(765, 20, &backimg1, SRCPAINT);
-
-			if (m_Health >= 60)
+			loadimage(&bar, L".\\resources\\Yhealthbar.png", 4, 52);
+			for (int i = 0; i < m_Health; i++)
 			{
-				loadimage(&bar, L".\\resources\\Ghealthbar.png", 4, 51);
-				for (int i = 0; i < m_Health; i++)
-				{
-					putimage(1172 - (double)i * 4, 37.5, &bar);
-				}
-			}
-			else if (m_Health < 60 && m_Health >= 30)
-			{
-				loadimage(&bar, L".\\resources\\Yhealthbar.png", 4, 52);
-				for (int i = 0; i < m_Health; i++)
-				{
-					putimage(1172 - (double)i * 4, 37.5, &bar);
-				}
-			}
-			else if (m_Health < 30)
-			{
-				loadimage(&bar, L".\\resources\\Rhealthbar.png", 4, 52);
-				for (int i = 0; i < m_Health; i++)
-				{
-					putimage(1172 - (double)i * 4, 37.5, &bar);
-				}
+				putimage(1172 - (double)i * 4, 37.5, &bar);
 			}
 		}
+		else if (m_Health < 30)
+		{
+			loadimage(&bar, L".\\resources\\Rhealthbar.png", 4, 52);
+			for (int i = 0; i < m_Health; i++)
+			{
+				putimage(1172 - (double)i * 4, 37.5, &bar);
+			}
+		}
+		
 	}
+	return DONE;
 }
 Sword Worrior::Update(clock_t deltaT, MapBase map)
 {
@@ -1156,7 +1140,9 @@ Sword Worrior::Update(clock_t deltaT, MapBase map)
 	//攻击更新
 	if (m_attackstate == BEGIN_FIRE)
 	{
-		m_attacktime += deltaT / 1000;
+		//cout << "attime = " << m_attacktime << endl;
+		//cout << "atspeed = " << m_attackspeed << endl;
+		m_attacktime += 3;
 		int attacktime = m_attacktime;
 		if (attacktime % m_attackspeed == 0)
 		{
@@ -1174,4 +1160,12 @@ void Worrior::Updatepos(pos basepos)
 {
 	m_shootpos.x = basepos.x;
 	m_shootpos.y = basepos.y - m_Gunheight;
+}
+int Worrior::GetFace()
+{
+	return m_faceori;
+}
+pos Worrior::GetShootpos()
+{
+	return m_shootpos;
 }

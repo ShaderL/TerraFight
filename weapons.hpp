@@ -17,7 +17,7 @@ public:
 	double m_speed;         //弹道速度
 	int m_life = alive;
 	int m_face;
-	Bullet(pos basepos, int face, int life = alive,int length = 20,int width = 20,int damage = 3,double speed = 1);
+	Bullet(pos basepos, int face, int life = alive,int length = 20,int width = 20,int damage = 5,double speed = 1);
 	Bullet(const Bullet& a);
 	~Bullet();
 	int Update(HitBox plhbox, clock_t deltaT);
@@ -35,7 +35,7 @@ public:
 	double m_speed;
 	int m_life = alive;
 	int m_face;
-	MagicBall(pos basepos, int face, int life = alive,int length = 60, int width = 60 , int damage = 5 , double speed = 1);
+	MagicBall(pos basepos, int face, int life = alive,int length = 60, int width = 60 , int damage = 15 , double speed = 1);
 	MagicBall(const MagicBall& a);
 	~MagicBall();
 	int Update(HitBox plhbox, clock_t deltaT);
@@ -51,10 +51,15 @@ public:
 	HitBox m_hbox;
 	int m_damage;
 	int m_life = alive;
+	int m_step;
+	int m_time;
+	int m_face;
+	int m_hit = 0;
+	Sword();
 	Sword(pos basepos, int face, int life = alive,int length = 120, int width = 70, int damage = 30);
 	Sword(const Sword& a);
 	~Sword();
-	int Update(HitBox plhbox, clock_t deltaT);
+	bool Update(HitBox plhbox, pos shotpos,int face);
 	int Paint();
 };
 
@@ -86,27 +91,23 @@ Bullet::~Bullet() {};
 int Bullet::Update(HitBox plhbox, clock_t deltaT)
 {
 	m_hbox.Updatepos(m_basepos);
-	cout << plhbox.GetPoint(upleft).x << ' ' << plhbox.GetPoint(upright).x << ' ' << plhbox.GetPoint(upleft).y << ' ' << plhbox.GetPoint(downleft).y << endl;
 	if (m_life == alive)
 	{
+		if (m_face == FACE_RIGHT)
+			m_basepos.x += m_speed * deltaT;
+		else if (m_face == FACE_LEFT)
+			m_basepos.x -= m_speed * deltaT;
 
 		if (plhbox.CheckPBHit(m_hbox.GetPoint(downleft)) == true)
 		{
 			m_life = dead;
-			cout << "HIT!" << endl;
 			return HIT;
 		}
-		if (m_hbox.GetPoint(upleft).x >= 1344 || m_hbox.GetPoint(upright).x <= 0)
+		if (m_hbox.GetPoint(upright).x >= 1344 || m_hbox.GetPoint(upleft).x <= 0)
 		{
 			m_life = dead;
 		}
-		if (m_life == alive)
-		{
-			if (m_face == FACE_RIGHT)
-				m_basepos.x += m_speed * deltaT;
-			else if (m_face == FACE_LEFT)
-				m_basepos.x -= m_speed * deltaT;
-		}
+
 		return MISS;
 	}
 	else 
@@ -124,38 +125,6 @@ int Bullet::Paint()
 		return DONE;
 	}
 }
-
-
-//int Bullet::g_attack()
-//{
-//	loadimage(&zidan, L"zidan.png", g_range.m_length, g_range.m_height);
-//	static DWORD t1 = 0, t2 = 0;
-//	if ((GetAsyncKeyState('J') || GetAsyncKeyState('1')) && (t2 - t1) > g_interval)
-//	{
-//		BeginBatchDraw();
-//		while (1)
-//		{
-//			//判定方向！
-//			putimage(g_handpos.x, g_handpos.y, &zidan);
-//			g_handpos.x += g_speed;
-//
-//			FlushBatchDraw();
-//			if (g_range.CheckHitBoxHit(Mage.m_hbox) || g_range.CheckHitBoxHit(Worrior.m_hbox)|| g_range.CheckHitBoxHit(Block.m_hbox))
-//			{
-//				break;
-//			}
-//		}
-//		EndBatchDraw();
-//		t1 = t2;
-//		if (g_range.CheckHitBoxHit(Mage.m_hbox) || g_range.CheckHitBoxHit(Worrior.m_hbox))
-//		{
-//			PlayerBase.m_life -= g_damage;
-//		}
-//	}
-//	t2 = GetTickCount();
-//}
-
-
 
 MagicBall::MagicBall(pos basepos, int face, int life ,int length, int width, int damage, double speed)
 {
@@ -222,35 +191,21 @@ int MagicBall::Paint()
 	}
 }
 
+Sword::Sword()
+{
 
+	m_basepos.x = 50;
+	m_basepos.y = 0;
 
-//int MagicBall::w_attack()
-//{
-//	static DWORD t1 = 0, t2 = 0;
-//	if ((GetAsyncKeyState('J') || GetAsyncKeyState('1')) && (t2 - t1) > g_interval)
-//	{
-//		while (1)
-//		{
-//			//判定方向！
-//			w_handpos.x += w_speed;
-//
-//			if (g_range.CheckHitBoxHit(Mage.m_hbox) || g_range.CheckHitBoxHit(Worrior.m_hbox) || g_range.CheckHitBoxHit(Block.m_hbox))
-//			{
-//				break;
-//			}
-//		}
-//		t1 = t2;
-//		if (g_range.CheckHitBoxHit(Mage.m_hbox) || g_range.CheckHitBoxHit(Worrior.m_hbox))
-//		{
-//			PlayerBase.m_life -= w_damage;
-//		}
-//	}
-//	t2 = GetTickCount();
-//}
-
-
-
-
+	m_length = 0;
+	m_width = 0;
+	HitBox hbox(m_basepos,0, 0);
+	m_hbox = hbox;
+	m_damage = 0;
+	m_life = 0;
+	m_step = 0;
+	m_time = 0;
+}
 Sword::Sword(pos basepos, int face, int life ,int length, int width, int damage)
 {
 	if (face == FACE_RIGHT)
@@ -269,7 +224,8 @@ Sword::Sword(pos basepos, int face, int life ,int length, int width, int damage)
 	m_hbox = hbox;
 	m_damage = damage;
 	m_life = life;
-
+	m_step = 0;
+	m_time = 0;
 }
 Sword::Sword(const Sword& a)
 {
@@ -279,49 +235,74 @@ Sword::Sword(const Sword& a)
 	m_hbox = a.m_hbox;
 	m_damage = a.m_damage;
 	m_life = a.m_life;
+	m_time = a.m_time;
+	m_step = a.m_step;
 }
 Sword::~Sword() {};
-int Sword::Update(HitBox plhbox, clock_t deltaT)
+bool Sword::Update(HitBox plhbox,pos shotpos,int face)
 {
-	if (m_hbox.CheckBoxHit(plhbox) == true)
+	m_basepos = shotpos;
+	m_hbox.Updatepos(shotpos);//update positions
+
+	m_face = face;//update face direction
+
+	m_time += 3;       //update animation step
+	if (m_time > 6 && m_time < 12)
+		m_step = 1;
+	else if (m_time >= 12)
+	{
 		m_life = dead;
-	return DONE;
+	}
+
+
+	if (m_hbox.CheckBoxHit(plhbox))//return hb hit
+		return true;
+	else 
+        return false;
 }
 int Sword::Paint()
 {
 	if (m_life == alive)
 	{
 		IMAGE img1, img2;        //剑气图片     图片大小用碰撞箱里的长宽
-		loadimage(&img1, L".\\resources\\Sword1.png", m_width, m_length);
-		loadimage(&img2, L".\\resources\\Sword2.png", m_width, m_length);
-		putimage(m_basepos.x, m_basepos.y, &img2, SRCAND);
-		putimage(m_basepos.x, m_basepos.y, &img1, SRCPAINT);
+		int xpl = 65, yp = 40, xpr = 45;//坐标偏移量
+		cout << "Step = " << m_step << endl;
+		if (m_step == 0)
+		{
+
+			if (m_face == FACE_LEFT)
+			{
+				loadimage(&img1, L".\\resources\\Sword1l.png", m_width, m_length);
+				loadimage(&img2, L".\\resources\\Sword11l.png", m_width, m_length);
+				putimage(m_basepos.x - xpl, m_basepos.y - yp, &img2, SRCAND);
+				putimage(m_basepos.x - xpl, m_basepos.y - yp, &img1, SRCPAINT);
+			}
+			else if (m_face == FACE_RIGHT)
+			{
+				loadimage(&img1, L".\\resources\\Sword1r.png", m_width, m_length);
+				loadimage(&img2, L".\\resources\\Sword11r.png", m_width, m_length);
+				putimage(m_basepos.x + xpr, m_basepos.y - yp, &img2, SRCAND);
+				putimage(m_basepos.x + xpr, m_basepos.y - yp, &img1, SRCPAINT);
+			}
+		}
+		else if (m_step == 1)
+		{
+
+			if (m_face == FACE_LEFT)
+			{
+				loadimage(&img1, L".\\resources\\Sword2l.png", m_width, m_length);
+				loadimage(&img2, L".\\resources\\Sword22l.png", m_width, m_length);
+				putimage(m_basepos.x - xpl, m_basepos.y - yp, &img2, SRCAND);
+				putimage(m_basepos.x - xpl, m_basepos.y - yp, &img1, SRCPAINT);
+			}
+			else if (m_face == FACE_RIGHT)
+			{
+				loadimage(&img1, L".\\resources\\Sword2r.png", m_width, m_length);
+				loadimage(&img2, L".\\resources\\Sword22r.png", m_width, m_length);
+				putimage(m_basepos.x + xpr, m_basepos.y - yp, &img2, SRCAND);
+				putimage(m_basepos.x + xpr, m_basepos.y - yp, &img1, SRCPAINT);
+			}
+		}
 	}
 	return DONE;
 }
-
-
-
-//int Sword::s_attack()
-//{
-//	static DWORD t1 = 0, t2 = 0;
-//	if ((GetAsyncKeyState('J') || GetAsyncKeyState('1')) && (t2 - t1) > g_interval)
-//	{
-//		while (1)
-//		{
-//			//判定方向
-//
-//			if (s_range.CheckHitBoxHit(Mage.m_hbox) || s_range.CheckHitBoxHit(Worrior.m_hbox) || s_range.CheckHitBoxHit(Block.m_hbox))
-//			{
-//				break;
-//			}
-//		}
-//		t1 = t2;
-//		if (s_range.CheckHitBoxHit(Mage.m_hbox) || s_range.CheckHitBoxHit(Worrior.m_hbox))
-//		{
-//			PlayerBase.m_life -= s_damage;
-//		}
-//	}
-//	t2 = GetTickCount();
-//}
-
