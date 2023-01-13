@@ -1,6 +1,5 @@
 #pragma once
 #include <easyx.h>
-#include <time.h>
 #include "Base.hpp"
 #include "Maps.hpp"
 
@@ -266,7 +265,6 @@ int Sword::Paint()
 	{
 		IMAGE img1, img2;        //剑气图片     图片大小用碰撞箱里的长宽
 		int xpl = 65, yp = 40, xpr = 45;//坐标偏移量
-		cout << "Step = " << m_step << endl;
 		if (m_step == 0)
 		{
 

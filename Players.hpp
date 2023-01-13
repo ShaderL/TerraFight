@@ -48,7 +48,6 @@ public:
 	int GetLife();
 	int GetJumpLock();
 	virtual void Updatepos(pos basepos);
-	void PullBack(Line l1, int linedir);
 	void Getmr();
 };
 
@@ -91,7 +90,7 @@ protected:
 
 public:
 	Worrior();
-	Worrior(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 15, double jumpspeed = 1000.0, int attackspeed = 36, int health = 100, int shield = 0, int faceori = FACE_LEFT);
+	Worrior(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 25, double jumpspeed = 1000.0, int attackspeed = 33, int health = 100, int shield = 0, int faceori = FACE_LEFT);
 	~Worrior();
 	int Paint();
 	int BeginAttack();
@@ -146,10 +145,12 @@ int PlayerBase::Paint()
 	return 0;
 }
 int PlayerBase::CalDamage(int damage)
-{
-	if (m_Health - (damage - m_Shield) > 0)
+{   
+	if (damage - m_Shield < 0)
+		m_Shield = 0;
+	else if (damage - m_Shield > 0 && (m_Health - (damage - m_Shield)) >= 0)
 		m_Health -= (damage - m_Shield);
-	else
+	else if (damage - m_Shield > 0 && (m_Health - (damage - m_Shield)) < 0)
 	{
 		m_Health = 0;
 		Die();
@@ -161,12 +162,19 @@ int PlayerBase::CalItemBuff(int type, int value)
 	switch (type)
 	{
 	case heal:
-		m_Health += value;
+		if (m_Health + value <= 100)
+			m_Health += value;
+		else if (m_Health + value > 100)
+			m_Health = 100;
+		break;
+
 	case shield:
 		m_Shield += value;
+		break;
 	case speedup:               //若为减速，则需传入负数
 	case speeddown:
 		m_Xspeed += value;
+		break;
 	}
 	return DONE;
 }
@@ -405,33 +413,6 @@ void PlayerBase::Updatepos(pos basepos)
 {
 	m_shootpos = basepos;
 }
-void PlayerBase::PullBack(Line l1, int linedir)
-{
-	if (linedir == leftline && m_pblock == 0)
-	{
-		m_basepos.x = l1.pos1.x - 50 - 1;//加上人物宽度
-		m_pblock = 1;//重置拉回锁
-		//y轴坐标不变
-	}
-	else if (linedir == rightline && m_pblock == 0)
-	{
-		m_basepos.x = l1.pos1.x + 1;//不需加入人物宽度，仅加一为了分开碰撞箱
-		m_pblock = 1;//重置拉回锁
-		//y轴坐标不变
-	}
-	else if (linedir == upline && m_pblock == 0)
-	{
-		m_basepos.y = l1.pos1.y - 1;//不需加入人物高度，仅减一为了分开碰撞箱
-		m_pblock = 1;//重置拉回锁
-		//x轴坐标不变
-	}
-	else if (linedir == downline && m_pblock == 0)
-	{
-		m_basepos.y = l1.pos1.y + 100 + 1;//加上人物高度
-		m_pblock = 1;//重置拉回锁
-		//x轴坐标不变
-	}
-}
 void PlayerBase::Getmr()
 {
 	cout << m_Ismovingr << endl;
@@ -533,11 +514,9 @@ void Shooter::Updatepos(pos basepos)
 }
 Bullet Shooter::Update(clock_t deltaT, MapBase map)
 {
-
 	if (m_life == alive)
 	{
 		CheckDirAccess(map);
-		//cout << " pos: u: " << m_hbox.GetPoint(upleft).y<< " d: " << m_hbox.GetPoint(downleft).y << " l: " << m_hbox.GetPoint(upleft).x << " r: " << m_hbox.GetPoint(upright).x << endl;
 		m_hbox.Updatepos(m_basepos);
 		Updatepos(m_basepos);
 		if (m_Health <= 0)
@@ -1026,7 +1005,7 @@ int Worrior::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Ghealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(188 + (double)i * 4, 37.5, &bar);
+				putimage(186 + (double)i * 4, 37.5, &bar);
 			}
 		}
 		else if (m_Health < 60 && m_Health >= 30)
@@ -1034,7 +1013,7 @@ int Worrior::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Yhealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(188 + (double)i * 4, 37.5, &bar);
+				putimage(186 + (double)i * 4, 37.5, &bar);
 			}
 		}
 		else if (m_Health < 30)
@@ -1042,7 +1021,7 @@ int Worrior::PaintHealthBar()
 			loadimage(&bar, L".\\resources\\Rhealthbar.png", 4, 52);
 			for (int i = 0; i < m_Health; i++)
 			{
-				putimage(188 + (double)i * 4, 37.5, &bar);
+				putimage(186 + (double)i * 4, 37.5, &bar);
 			}
 		}
 	}

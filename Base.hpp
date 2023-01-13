@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <windows.h>
+#include <stdlib.h>
+#include <time.h>
 using namespace std;
 //本头文件用于存放一些全局通用的结构体和预处理宏定义
 
@@ -74,7 +76,12 @@ struct Line //线段结构，仅限水平或垂直线段
 	pos pos1;
 	pos pos2;
 };
-
+typedef struct ItPosition
+{
+	double x;
+	double y;
+	int value;//1表示可用 0表示已被占用
+}ipos;
 
 typedef struct DirectionAccess
 {
@@ -419,7 +426,6 @@ int HitBox::Updatepos(pos basepos)
 
 	m_DownRight.x = m_Basepos.x + m_width;
 	m_DownRight.y = m_Basepos.y;
-
 
 	return DONE;
 }

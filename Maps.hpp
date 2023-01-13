@@ -3,53 +3,43 @@
 #include <easyx.h>
 #include "Base.hpp"
 
-class Block                                                 //请看这里
+class Block                                                
 {
 protected:
 	pos m_basepos;
 	HitBox m_hbox;
 	int m_life;
-	int m_width;//必须为basewid的整数倍
+	int m_width;
 	static int m_height;
 
 public:
 	Block(){};
 	Block(pos basepos,HitBox hbox,int length);
 	~Block();
-	virtual int Draw();                                      //请在cpp文件里实现Draw函数
+	virtual int Draw();                                      
 	int Delete();
 	int Update();
 	HitBox GetHBox();
-};
-class MovingBlock:public Block                         //忽略这个类
-{
-private:
-	int m_speed;
-	pos m_beginpos;
-	pos m_endpos;
-	int m_dir;   //当前移动方向
-	int m_totaldir;
 
-public:
-	MovingBlock(pos basepos,HitBox hbox,int speed,pos beginpos,pos endpos);
-	~MovingBlock();
-	int Paint();
-	int Move();
 };
 
-class MapBase                                         //这是地图类，可以把贴图的路径写到 m_sourcepath.sourcepath 里。（去Maps.cpp里的Mapbase构造函数里写）
+
+class MapBase                                         
 {
 protected:
 	int m_blocknum;
 	vector<Block> m_blocklist;
+	vector<ipos> m_ItemPoslist;
 
 public:
 	MapBase();
 	~MapBase();
 	int Update();
-	int Draw();                                  //请在Maps.cpp里实现Draw函数（画block时直接调用block.draw()就行（你刚刚实现的））
+	int Draw();                                  
 	int GetBlockNum();
 	Block GetBlock(int num);
+	ipos Getposas(int i);
+	void Changeposvalue(int i, int value);
 };
 
 
@@ -81,7 +71,7 @@ int Block::Draw()                        //实现后请直接翻到最下面看MapBase的构造
 		{
 			putimage(m_basepos.x + basewid * (i - 1), m_basepos.y , &block);
 		}
-
+		//m_hbox.DrawHbox();
 	}
 	return DONE;
 }
@@ -103,56 +93,11 @@ HitBox Block::GetHBox()
 	return m_hbox;
 }
 
-
-
-MovingBlock::MovingBlock(pos basepos, HitBox hbox, int speed, pos beginpos, pos endpos)
-{
-	m_life = alive;
-
-	m_basepos.x = basepos.x;
-	m_basepos.y = basepos.y;
-
-	m_hbox = hbox;
-	m_speed = speed;
-
-	m_beginpos.x = beginpos.x;
-	m_beginpos.y = beginpos.y;
-
-	m_endpos.x = endpos.x;
-	m_endpos.y = endpos.y;
-
-	if (m_beginpos.x == m_endpos.x)
-		m_totaldir = Ydir;
-	else if (m_beginpos.y == m_endpos.y)
-		m_totaldir = Xdir;
-}
-MovingBlock::~MovingBlock() {}
-int MovingBlock::Paint()
-{
-	//
-}
-int MovingBlock::Move()
-{
-	if (m_basepos.x == m_beginpos.x && m_basepos.y == m_beginpos.y)
-	{
-
-	}
-	else if (m_basepos.x == m_endpos.x && m_basepos.y == m_endpos.y)
-	{
-
-	}
-	else
-	{
-
-	}
-}
-
-
-
 MapBase::MapBase()
 {
 	pos posground, posflyblock1, posflyblock2;
 	HitBox hboxg, hboxf1, hboxf2;
+	ipos itpos1, itpos2, itpos3, itpos4;
 
 	m_blocknum = 3;
 
@@ -162,6 +107,23 @@ MapBase::MapBase()
 	posflyblock1.y = 300;
 	posflyblock2.x = 900;                       //浮空方块2
 	posflyblock2.y = 300;
+
+	itpos1.x = 250;                             //道具可生成坐标点
+	itpos1.y = 280;
+	itpos1.value = 1;
+
+	itpos2.x = 1050;
+	itpos2.y = 280;
+	itpos2.value = 1;
+
+	itpos3.x = 650;
+	itpos3.y = 640;
+	itpos3.value = 1;
+
+	itpos4.x = 650;
+	itpos4.y = 300;
+	itpos4.value = 1;
+
 
 	hboxg.Assignment(posground, 100, 1400);      //三个方块的碰撞箱，括号里的内容是（基础坐标，高度，宽度）
 	hboxf1.Assignment(posflyblock1, 100, 300);
@@ -175,6 +137,11 @@ MapBase::MapBase()
 	m_blocklist.push_back(groundblock);            //往MapBase类里的vector<Block>容器里插入元素
 	m_blocklist.push_back(Flyingblock);
 	m_blocklist.push_back(Flyingblock2);
+
+	m_ItemPoslist.push_back(itpos1);
+	m_ItemPoslist.push_back(itpos2);
+	m_ItemPoslist.push_back(itpos3);
+	m_ItemPoslist.push_back(itpos4);
 }
 MapBase::~MapBase() {};
 int MapBase::Draw()
@@ -231,9 +198,34 @@ Block MapBase::GetBlock(int num)
 }
 int MapBase::Update()
 {
+
 	for (vector<Block>::iterator it = m_blocklist.begin(); it != m_blocklist.end(); it++)
 	{
 		it->Update();
 		return DONE;
 	}
 }
+ipos MapBase::Getposas(int i)
+{
+	int j = 0;
+	for (vector<ipos>::iterator it = m_ItemPoslist.begin(); it != m_ItemPoslist.end(); it++)
+	{
+		if (j == i)
+			return *it;
+		j++;
+	}
+}
+void MapBase::Changeposvalue(int i, int value)
+{
+	int j = 0;
+	for (vector<ipos>::iterator it = m_ItemPoslist.begin(); it != m_ItemPoslist.end(); it++)
+	{
+		if (i == j)
+		{
+			it->value = value;
+
+		}
+		j++;
+	}
+}
+
