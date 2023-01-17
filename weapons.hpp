@@ -304,3 +304,5 @@ int Sword::Paint()
 	}
 	return DONE;
 }
+
+//V1.0
