@@ -89,7 +89,6 @@ ItemBase::ItemBase(pos basepos, HitBox hbox, int value)
 }
 
 
-string CureHeart::m_ID = "CureHeart";
 CureHeart::CureHeart(pos basepos, HitBox hbox, int value)
 {
 	m_basepos.x = basepos.x;
@@ -144,7 +143,7 @@ bool CureHeart::Update(HitBox plhbox, MapBase &map)
 	return false;
 }
 
-string Shield::m_ID = "Shield";
+
 Shield::Shield(pos basepos, HitBox hbox, int value)
 {
 	m_basepos.x = basepos.x;
@@ -197,7 +196,7 @@ bool Shield::Update(HitBox plhbox, MapBase &map)
 	return false;
 }
 
-string SpeedShoes::m_ID = "SpeedShoes";
+
 SpeedShoes::SpeedShoes(pos basepos, HitBox hbox, int value)
 {
 	m_basepos.x = basepos.x;

@@ -38,7 +38,7 @@ const int upright = 1;
 const int downleft = 2;
 const int downright = 3;
 
-const int shooter = 0;
+const int shooter = 3;     //玩家职业选择
 const int mage = 1;
 const int worrior = 2;
 
@@ -256,15 +256,17 @@ public:
 	HitBox(pos basepos, int length, int width);
 	HitBox(const HitBox* hbox);
 	~HitBox();
-	pos GetPoint(int point);
+	
 	int Updatepos(pos basepos);
 	int Assignment(pos upleftpos, pos downrightpos);   //赋值函数
 	int Assignment(pos basepos, int length, int width);
 	bool CheckPBHit(pos targetpos);                   //检查点箱碰撞
 	bool CheckLBHit(Line l1);                         //检查线箱碰撞
 	bool CheckBoxHit(HitBox targethbox);              //检查箱箱碰撞
-	void DrawHbox();
 	Line GetLine(int line);
+	pos GetPoint(int point);
+	void DrawHbox();
+
 };
 
 

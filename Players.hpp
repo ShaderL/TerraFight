@@ -8,12 +8,11 @@ class PlayerBase
 {
 protected:
 	int m_life;
-	int m_player;//用来判断血条位置
 	int m_Health;
 	int m_Shield;
 	pos m_basepos;
 	pos m_shootpos;
-	int m_attackspeed;
+	int m_attackspeed;//攻击间隔
 	int m_faceori;
 	HitBox m_hbox;
 	double m_Xspeed;    //水平速度
@@ -25,12 +24,14 @@ protected:
 	int m_Ismovingl;
 	int m_Ismovingr;
 	int m_Gunheight = 70;
-	double m_attacktime = 0;
 	int m_attackstate = END_FIRE;
-	int m_pblock;
+	int m_player;//用来判断血条位置
+	double m_attacktime = 0;
+
+
 
 public:
-	PlayerBase():m_Ismovingl(0),m_Ismovingr(0), m_pblock(0), m_G(1100), m_jumplock(0) {};
+	PlayerBase():m_Ismovingl(0),m_Ismovingr(0), m_G(1100), m_jumplock(0) {};
 	PlayerBase( pos basepos, HitBox hbox, pos shootpos, int player,double xspeed = 10.000, double jumpspeed = 10, int attackspeed = 10,int health = 100, int shield = 0,int faceori = FACE_LEFT);
 	~PlayerBase();
 	virtual int Paint();                            //int 返回函数执行情况
@@ -41,21 +42,17 @@ public:
 	int EndMoveleft();
 	int EndMoveright();
 	int CheckDirAccess(MapBase map);        //int 返回函数执行情况
-	int Die();                              //int 返回函数执行情况
 	int Jump();                             //int 返回函数执行情况
-	int Update(clock_t deltaT,MapBase map);
 	HitBox GetHitBox();
 	int GetLife();
 	int GetJumpLock();
 	virtual void Updatepos(pos basepos);
-	void Getmr();
+	int Update(clock_t deltaT,MapBase map);
+    int Die();                              //int 返回函数执行情况
 };
 
 class Shooter :public PlayerBase
 {
-protected:
-	static string m_ID;
-
 public:
 	Shooter(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 10, double jumpspeed = 1000.0, int attackspeed = 9, int health = 100, int shield = 0, int faceori = FACE_LEFT);
 	~Shooter();
@@ -69,9 +66,6 @@ public:
 
 class Mage :public PlayerBase
 {
-protected:
-	static string m_ID;
-
 public:
 	Mage(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 10, double jumpspeed = 1000.0, int attackspeed = 30,int health = 100, int shield = 0, int faceori = FACE_LEFT);
 	~Mage();
@@ -85,9 +79,6 @@ public:
 
 class Worrior :public PlayerBase
 {
-protected:
-	static string m_ID;
-
 public:
 	Worrior();
 	Worrior(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed = 25, double jumpspeed = 1000.0, int attackspeed = 33, int health = 100, int shield = 0, int faceori = FACE_LEFT);
@@ -413,14 +404,11 @@ void PlayerBase::Updatepos(pos basepos)
 {
 	m_shootpos = basepos;
 }
-void PlayerBase::Getmr()
-{
-	cout << m_Ismovingr << endl;
-}
 
 
 
-string Shooter::m_ID = "Shooter";
+
+
 Shooter::Shooter(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed, double jumpspeed, int attackspeed, int health, int shield, int faceori)
 {
 	m_dir.right = accessable;
@@ -665,7 +653,7 @@ int Shooter::PaintHealthBar()
 
 
 
-string Mage::m_ID = "Mage";
+
 Mage::Mage(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed, double jumpspeed, int attackspeed, int health, int shield, int faceori)
 {
 	m_dir.right = accessable;
@@ -906,7 +894,7 @@ void Mage::Updatepos(pos basepos)
 }
 
 
-string Worrior::m_ID = "Worrior";
+
 Worrior::Worrior(pos basepos, HitBox hbox, pos shootpos, int player, double xspeed, double jumpspeed, int attackspeed, int health, int shield, int faceori)
 {
 	m_dir.right = accessable;

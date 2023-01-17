@@ -8,6 +8,7 @@
 #include "Items.hpp"
 #include "Players.hpp"
 #include "Maps.hpp"
+#include "start.hpp"
 
 
 using namespace std;
@@ -24,19 +25,19 @@ vector<CureHeart> chlist;
 vector<Shield> sdlist;
 vector<SpeedShoes> sslist;
 
-pc StartMenu()
-{
-	pc playerchoices;
-	playerchoices.player1 = shooter;
-	playerchoices.player2 = mage;
-
-
-
-
-
-
-	return playerchoices;
-}
+//pc draw_start()
+//{
+//	pc playerchoices;
+//	playerchoices.player1 = shooter;
+//	playerchoices.player2 = mage;
+//
+//
+//
+//
+//
+//
+//	return playerchoices;
+//}
 void GameProgress(pc playerchoices,HWND hwnd)
 {
 
@@ -4729,7 +4730,7 @@ int main()
 	pc playerchoices;
 	//HWND hwnd = initgraph(1344, 756,SHOWCONSOLE);//1344 756
 	HWND hwnd = initgraph(1344, 756);//1344 756
-	playerchoices = StartMenu();
+	playerchoices = draw_start(hwnd);
 	GameProgress(playerchoices, hwnd);
 	EndProgress(hwnd);
 	return 0;

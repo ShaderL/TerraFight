@@ -34,8 +34,8 @@ protected:
 public:
 	MapBase();
 	~MapBase();
-	int Update();
-	int Draw();                                  
+	int Draw();
+	int Update();                
 	int GetBlockNum();
 	Block GetBlock(int num);
 	ipos Getposas(int i);
